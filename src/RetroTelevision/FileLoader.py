@@ -9,8 +9,8 @@ class FileLoader:
 
     def load_root_filepath(self, filepath = None):
         if filepath == None:
-            filepath = os.path.join(os.getcwd, 'appsettings.json')
-        with open("config.json", "r") as f:
+            filepath = os.path.join(os.getcwd(), 'appsettings.json')
+        with open(filepath, "r") as f:
             config = json.load(f)
         
         return config['RootFilePath']
