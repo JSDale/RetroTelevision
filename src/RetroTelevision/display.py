@@ -4,17 +4,17 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import QUrl
 
 class Display:
-    
-    def on_media_status_changed(status):
-        if status != QMediaPlayer.MediaStatus.EndOfMedia:
-            return
-        print('next file')
 
     def __init__(self):
         self._app = QApplication([])
         self._player = QMediaPlayer()
         self._player.mediaStatusChanged.connect(self.on_media_status_changed)
         self._window = QWidget()
+
+    def on_media_status_changed(status):
+        if status != QMediaPlayer.MediaStatus.EndOfMedia:
+            return
+        print('next file')
 
     def configure(self):
         self._window.setWindowTitle("Retro Television")
@@ -24,7 +24,7 @@ class Display:
         layout.addWidget(video_widget)
 
         self._player.setVideoOutput(video_widget)
-        self._player.setMedia(QMediaContent(QUrl.fromLocalFile("")))
+        self._player.setMedia(QMediaContent(QUrl.fromLocalFile("/Users/jacobdale/Desktop/20220716_133618.mp4")))
 
         self._window.setLayout(layout)
         self._window.showFullScreen()
