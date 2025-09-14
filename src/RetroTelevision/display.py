@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence
 from FileLoader import FileLoader
 
@@ -15,7 +15,7 @@ class Display:
         self._window = QWidget()
         self._file_paths = None
         self.file_loader = FileLoader()
-        self.path_index = 0
+        self._path_index = 0
         self._file_index = 0
 
     def on_media_status_changed(self, status):
@@ -34,7 +34,7 @@ class Display:
         layout.addWidget(self._video_widget)
 
         self._player.setVideoOutput(self._video_widget)
-        self._player.setMedia(QMediaContent(QUrl.fromLocalFile("/Users/jacobdale/Desktop/20220716_133618.mp4")))
+        self._player.setMedia(QMediaContent(QUrl.fromLocalFile(self._file_paths[self._path_index][self._file_index])))
 
         self._window.setLayout(layout)
         self._window.showFullScreen()
@@ -73,6 +73,6 @@ class Display:
 
     def _increment_file_index(self):
         self._file_index = self._file_index + 1
-        if self._file_index > len(self._file_paths[0]):
+        if self._file_index >= len(self._file_paths[0]):
             self._file_index = 0
 
