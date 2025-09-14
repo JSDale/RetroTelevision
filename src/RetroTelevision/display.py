@@ -1,79 +1,78 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QShortcut
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtGui import QKeySequence
 from FileLoader import FileLoader
 import vlc
+import sys
 
-class Display:
-
+class Display(QWidget):
     def __init__(self):
-        self._app = QApplication([])
-        self._player = QMediaPlayer()
-        self._video_widget = QVideoWidget()
-        self._player.mediaStatusChanged.connect(self.on_media_status_changed)
-        self._window = QWidget()
-        self._file_paths = None
-        self.file_loader = FileLoader()
+        super().__init__()
+        self._file_loader = FileLoader()
+        self._file_paths = self._file_loader.get_file_paths()
         self._path_index = 0
         self._file_index = 0
 
-    def on_media_status_changed(self, status):
-        if status != QMediaPlayer.MediaStatus.EndOfMedia:
-            return
-        
-        self._next_media()
+        # Layout
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-    def configure(self):
-        self._file_paths = self.file_loader.get_file_paths()
-        self._window.setWindowTitle("Retro Television")
+        # VLC player
+        self.instance = vlc.Instance()
+        self.player = self.instance.media_player_new()
+        self._load_media(self._get_next_media())
 
+        # Key bindings
         self._bind_key_presses()
-        self._setup_player()
-        layout = QVBoxLayout()
-
-        self._window.setLayout(layout)
-        self._window.showFullScreen()
 
     def start(self):
-        self._player.play()
-        self._app.exec()
+        """Attach VLC video to the widget and start playback"""
+        if sys.platform.startswith("linux"):
+            self.player.set_xwindow(self.winId())
+        elif sys.platform == "win32":
+            self.player.set_hwnd(self.winId())
+        elif sys.platform == "darwin":
+            # On macOS, winId() must be cast to int
+            self.player.set_nsobject(int(self.winId()))
 
-    def _setup_player(self, layout):
-        layout.addWidget(self._video_widget)
-        self._player.setVideoOutput(self._video_widget)
-        self._player.setMedia(QMediaContent(QUrl.fromLocalFile(self._file_paths[self._path_index][self._file_index])))
+        self.player.play()
 
     def _bind_key_presses(self):
-        self.shortcut = QShortcut(QKeySequence("N"), self._video_widget)
-        self.shortcut.activated.connect(self._next_media)
+        """Bind keyboard shortcuts"""
+        self.shortcut_next = QShortcut(QKeySequence("N"), self)
+        self.shortcut_next.activated.connect(self._next_media)
 
     def _next_media(self):
-        self._player.stop()
-        media_path = self._get_next_media()
-        if media_path == None:
-            return
-        
-        self._player.setMedia(QMediaContent(QUrl.fromLocalFile(media_path)))
-        self._player.play()
+        """Stop current media and play the next one"""
+        self.player.stop()
+        next_media = self._get_next_media()
+        if next_media:
+            self._load_media(next_media)
+            self.player.play()
+
+    def _load_media(self, path):
+        """Load a media file into VLC player"""
+        if path:
+            media = self.instance.media_new(path)
+            self.player.set_media(media)
 
     def _get_next_media(self):
+        """Get the next media file path"""
         path_count = len(self._file_paths)
         if path_count == 0:
             return None
-        
+
         if path_count == 1:
             self._increment_file_index()
             return self._file_paths[0][self._file_index]
-        
-        self._path_index = self._path_index + 1
-        if self._path_index > path_count:
+
+        self._path_index += 1
+        if self._path_index >= path_count:
             self._path_index = 0
         self._increment_file_index()
         return self._file_paths[self._path_index][self._file_index]
 
     def _increment_file_index(self):
-        self._file_index = self._file_index + 1
+        """Cycle through files in the current path"""
+        self._file_index += 1
         if self._file_index >= len(self._file_paths[0]):
             self._file_index = 0
