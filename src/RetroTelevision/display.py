@@ -12,16 +12,8 @@ class Display(QWidget):
         self._path_index = 0
         self._file_index = 0
 
-        # Layout
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-
-        # VLC player
-        self.instance = vlc.Instance()
-        self.player = self.instance.media_player_new()
-        self._load_media(self._get_next_media())
-
-        # Key bindings
+        self._configure_layout()
+        self._configure_vlc()
         self._bind_key_presses()
 
     def start(self):
@@ -36,10 +28,26 @@ class Display(QWidget):
 
         self.player.play()
 
+    def _configure_layout(self):
+        """Sets up the UI layout"""
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+
+    def _configure_vlc(self):
+        """Configure the VLC element"""
+        self.instance = vlc.Instance()
+        self.player = self.instance.media_player_new()
+        self._load_media(self._file_paths[0][0])
+        event_manager = self.player.event_manager()
+        event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self._on_media_finished)
+
     def _bind_key_presses(self):
         """Bind keyboard shortcuts"""
         self.shortcut_next = QShortcut(QKeySequence("N"), self)
         self.shortcut_next.activated.connect(self._next_media)
+
+    def _on_media_finished(self, event):
+        self._next_media()
 
     def _next_media(self):
         """Stop current media and play the next one"""
