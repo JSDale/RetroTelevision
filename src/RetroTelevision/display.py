@@ -4,6 +4,7 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence
 from FileLoader import FileLoader
+import vlc
 
 class Display:
 
@@ -29,12 +30,8 @@ class Display:
         self._window.setWindowTitle("Retro Television")
 
         self._bind_key_presses()
-
+        self._setup_player()
         layout = QVBoxLayout()
-        layout.addWidget(self._video_widget)
-
-        self._player.setVideoOutput(self._video_widget)
-        self._player.setMedia(QMediaContent(QUrl.fromLocalFile(self._file_paths[self._path_index][self._file_index])))
 
         self._window.setLayout(layout)
         self._window.showFullScreen()
@@ -42,6 +39,11 @@ class Display:
     def start(self):
         self._player.play()
         self._app.exec()
+
+    def _setup_player(self, layout):
+        layout.addWidget(self._video_widget)
+        self._player.setVideoOutput(self._video_widget)
+        self._player.setMedia(QMediaContent(QUrl.fromLocalFile(self._file_paths[self._path_index][self._file_index])))
 
     def _bind_key_presses(self):
         self.shortcut = QShortcut(QKeySequence("N"), self._video_widget)
