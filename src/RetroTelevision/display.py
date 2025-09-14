@@ -1,3 +1,4 @@
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtGui import QKeySequence
 from FileLoader import FileLoader
@@ -47,7 +48,7 @@ class Display(QWidget):
         self.shortcut_next.activated.connect(self._next_media)
 
     def _on_media_finished(self, event):
-        self._next_media()
+        QTimer.singleShot(0, self._next_media)
 
     def _next_media(self):
         """Stop current media and play the next one"""
