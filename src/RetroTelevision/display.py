@@ -75,4 +75,3 @@ class Display:
         self._file_index = self._file_index + 1
         if self._file_index >= len(self._file_paths[0]):
             self._file_index = 0
-
