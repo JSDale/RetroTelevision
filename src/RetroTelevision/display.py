@@ -2,6 +2,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QShortcut
 from PyQt5.QtGui import QKeySequence
 from FileLoader import FileLoader
+import random
 import vlc
 import sys
 
@@ -74,7 +75,7 @@ class Display(QWidget):
             self._increment_file_index()
             return self._file_paths[0][self._file_index]
 
-        self._path_index += 1
+        self._path_index = self._randomize_index(path_count-1)
         if self._path_index >= path_count:
             self._path_index = 0
         self._increment_file_index()
@@ -82,6 +83,11 @@ class Display(QWidget):
 
     def _increment_file_index(self):
         """Cycle through files in the current path"""
-        self._file_index += 1
+        self._file_index = self._randomize_index(len(self._file_paths[self._path_index])-1)
         if self._file_index >= len(self._file_paths[0]):
             self._file_index = 0
+
+    def _randomize_index(self, max, min=0):
+        rand = random.randint(min, max)
+        print(rand)
+        return rand
