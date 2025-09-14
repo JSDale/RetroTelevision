@@ -4,7 +4,7 @@ import os
 class FileLoader:
 
     def get_file_paths(self):
-        root_filepath = self.load_root_filepath()
+        root_filepath = self._load_root_filepath()
         sub_folders = [
         f for f in os.listdir(root_filepath)
         if os.path.isdir(os.path.join(root_filepath, f))
@@ -15,13 +15,16 @@ class FileLoader:
 
         all_videos = []
         for folder in sub_folders:
-            all_files = [f for f in os.listdir(folder) 
-                         if os.path.isfile(os.path.join(folder, f)) and f.lower().endswith('.mp4')]
+            all_files = []
+            for file_name in os.listdir(folder):
+                full_path = os.path.join(folder, file_name)
+                if os.path.isfile(full_path) and (file_name.lower().endswith('.mp4') or file_name.lower().endswith('.mkv')):
+                    all_files.append(full_path)
             all_videos.append(all_files)
 
         return all_videos
 
-    def load_root_filepath(self, filepath = None):
+    def _load_root_filepath(self, filepath = None):
         if filepath == None:
             filepath = os.path.join(os.getcwd(), 'appsettings.json')
         with open(filepath, "r") as f:

@@ -1,4 +1,4 @@
-from RetroTelevision import Display
+from display import Display
 
 _display = Display()
 
